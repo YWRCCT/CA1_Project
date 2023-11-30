@@ -1,29 +1,42 @@
 # Read the dataset 
 crimes_Boston <- read.csv("crime.csv")
+offense_codes <- read.csv("offense_codes.csv")
 
-# Select only the first 7000 rows
-crimes_Boston_subset <- head(crimes_Boston, 7000)
+# check the datasets
+print(head(crimes_Boston))
+print(head(offense_codes))
 
-print(names(crimes_Boston_subset))
+library(dplyr)
 
-#Select only 10 columns to explore in this project
-selected_columns <- c("INCIDENT_NUMBER", "OFFENSE_CODE","OFFENSE_CODE_GROUP", "OFFENSE_DESCRIPTION", "DISTRICT",
-                      "YEAR", "MONTH", "DAY_OF_WEEK", "HOUR", "STREET")
-crimes_Boston_subset <- crimes_Boston_subset[, selected_columns]
+# merge both datasets and drop the column CODE from offense_codes
+crimes_complete <- left_join(crimes_Boston, offense_codes %>% select(CODE, NAME), by = c("OFFENSE_CODE" = "CODE"))
+head(crimes_complete)
 
-library(ggplot2)
 
-# Histogram for Years (continuous variable)
-ggplot(crimes_Boston_subset, aes(x = YEAR)) +
-  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
-  labs(title = "Histogram of YEAR")
+# With the library skimr we can have a complete data summary with the mean/median, minimum, maximum and standard deviation
+install.packages("skimr")
+library(skimr)
+numerical_summary_skim <- skim(crimes_complete)
 
-# Bar plot for day of the week ( categorical variable)
-ggplot(crimes_Boston_subset, aes(x = DAY_OF_WEEK)) +
-  geom_bar(fill = "green", color = "black") +
-  labs(title = "Bar Plot of DAY_OF_WEEK")
+print(numerical_summary_skim)
 
-# Count plot for Months (discrete variables)
-ggplot(crimes_Boston_subset, aes(x = factor(MONTH))) +
-  geom_bar(fill = "orange", color = "black") +
-  labs(title = "Count Plot of MONTH")
+crimes_
+
+
+# ------------------ Preparation of the data ---------------------------
+
+# Replace 'Y' with 'YES' and null with 'NO' in the 'SHOOTING' column
+crimes_complete <- crimes_complete %>%
+  mutate(SHOOTING = ifelse(coalesce(SHOOTING, "") == "", 'NO', ifelse(SHOOTING == 'y', 'YES', SHOOTING)))
+
+# Replace "(0.00000000, 0.00000000)" with null in the 'Location' column
+crimes_complete <- crimes_complete %>%
+  mutate(Location = ifelse(Location == "(0.00000000, 0.00000000)", NA, Location))
+
+
+# Calculate the percentage of missing values in each column
+missing_percentage <- colMeans(is.na(crimes_complete)) * 100
+
+# Print the result
+cat("Missing values (%):\n")
+print(missing_percentage)
