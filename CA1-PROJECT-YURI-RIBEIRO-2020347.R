@@ -20,7 +20,7 @@ numerical_summary_skim <- skim(crimes_complete)
 
 print(numerical_summary_skim)
 
-crimes_
+
 
 
 # ------------------ Preparation of the data ---------------------------
@@ -40,3 +40,30 @@ missing_percentage <- colMeans(is.na(crimes_complete)) * 100
 # Print the result
 cat("Missing values (%):\n")
 print(missing_percentage)
+
+# Data type of variables and bar plot
+library(ggplot2)
+var_types <- sapply(crimes_complete, class)
+plot_data_types <- data.frame(variable = names(var_types), type = var_types)
+
+ggplot(plot_data_types, aes(x = type, fill = type))+
+  geom_bar()+
+  labs(title = "Distribution of Variables types",
+       x= "Variable type",
+       y = "Count") +
+  theme_minimal()
+
+# Min-MAX normalization, Z-score Standadization 
+columns_to_apply <- c("OFFENSE_CODE", "REPORTING_AREA", "YEAR", "MONTH")
+
+# Min-Max
+crimes_complete_minMax <- crimes_complete %>%
+  mutate(across(all_of(columns_to_apply), ~ (.-min(.))/(max(.)-min(.))))
+print(select(crimes_complete_minMax, all_of(columns_to_apply)))                
+
+#Z-Score
+crimes_complete_zScore <- crimes_complete %>%
+  mutate(across(all_of(columns_to_apply), scale))
+print(select(crimes_complete_zScore, all_of(columns_to_apply)))    
+
+
