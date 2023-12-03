@@ -1,9 +1,9 @@
-library(dplyr)
-library(tidyr)
-library(gridExtra)
-library(stringi)
-library(skimr)
-library(ggplot2)
+library(dplyr) # Enable data frame manipulation.
+library(tidyr) # Helps to create tidy data.
+library(gridExtra) # Used to mix multiple graphs on the same picture.
+library(stringi) # Used to format string values.
+library(skimr) # Used to provide summary statistics about variables.
+library(ggplot2) # Library for creating graphics.
 
 
 # Read the dataset 
@@ -149,7 +149,7 @@ plot(pca_result, type = "l", main = "PCA Plot")
 
 ggplot(crimes_complete, aes(x = reorder(DISTRICT, -table(DISTRICT)[DISTRICT]), fill = DISTRICT)) +
   geom_bar(stat = "count") +
-  labs(x = "Number of Reported Crimes", y = "District") +
+  labs(x = "District", y = "Number of Reported Crimes") +
   theme_minimal() +
   theme(axis.text.y = element_text(size = 8)) +  
   coord_flip() 
@@ -179,8 +179,8 @@ top10_crimes <- top10_crimes[order(-top10_crimes$Count_crimes), ]
 top_10_plot <- ggplot(top10_crimes[1:10, ], 
                                  aes(x = Count_crimes, y = reorder(OFFENSE_CODE_GROUP, -Count_crimes))) +
   geom_bar(stat = "identity", fill = "red") +
-  labs(x = "Number of Reported Crimes", y = "") +
-  ggtitle("Top 10 Types of Crimes") +
+  labs(x = "Number of Crime incident reports", y = "") +
+  ggtitle("Top 10 Incident Reports") +
   theme_minimal() +
   theme(axis.text.y = element_text(angle = 0, vjust = 0.5))  
 
@@ -188,8 +188,8 @@ top_10_plot <- ggplot(top10_crimes[1:10, ],
 bottom_10_plot <- ggplot(top10_crimes[(nrow(top10_crimes)-9):nrow(top10_crimes), ], 
                                     aes(x = Count_crimes, y = reorder(OFFENSE_CODE_GROUP, Count_crimes))) +
   geom_bar(stat = "identity", fill = "blue") +
-  labs(x = "Number of Reported Crimes", y = "") +
-  ggtitle("Bottom 10 Types of Crimes") +
+  labs(x = "Number of Crime incident reports", y = "") +
+  ggtitle("Bottom 10 Incident Reports") +
   theme_minimal() +
   theme(axis.text.y = element_text(angle = 0, vjust = 0.5))  
 
