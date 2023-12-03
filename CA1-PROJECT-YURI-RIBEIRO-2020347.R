@@ -1,4 +1,5 @@
 library(dplyr)
+library(tidyr)
 library(gridExtra)
 library(stringi)
 library(skimr)
@@ -17,6 +18,7 @@ print(head(offense_codes))
 
 # merge both datasets and drop the column CODE from offense_codes
 crimes_complete <- left_join(crimes_Boston, offense_codes %>% select(CODE, NAME), by = c("OFFENSE_CODE" = "CODE"))
+
 head(crimes_complete)
 
 
@@ -30,7 +32,7 @@ print(numerical_summary_skim)
 
 # ------------------ Preparation of the data ---------------------------
 
-# 
+# Format the values of the variable OFFENSE_DESCRIPTION and DAY_OF_WEEK 
 crimes_complete$OFFENSE_DESCRIPTION <- stri_trans_general(crimes_complete$OFFENSE_DESCRIPTION, "Latin-ASCII")
 crimes_complete$DAY_OF_WEEK <- stri_trans_general(crimes_complete$DAY_OF_WEEK, "Latin-ASCII")
 
@@ -43,6 +45,8 @@ crimes_complete <- crimes_complete %>%
 crimes_complete <- crimes_complete %>%
   mutate(Location = ifelse(Location == "(0.00000000, 0.00000000)", NA, Location))
 
+# Replace all missing values in the 'Location" column to NA
+crimes_complete <- crimes_complete %>% replace_na(replace = list(Location = NA))
 
 # Calculate the percentage of missing values in each column
 missing_percentage <- colMeans(is.na(crimes_complete)) * 100
@@ -50,6 +54,7 @@ missing_percentage <- colMeans(is.na(crimes_complete)) * 100
 # Print the result
 cat("Missing values (%):\n")
 print(missing_percentage)
+
 
 # Data type of variables and bar plot
 
@@ -63,7 +68,8 @@ ggplot(plot_data_types, aes(x = type, fill = type))+
        y = "Count") +
   theme_minimal()
 
-# Min-MAX normalization, Z-score Standadization 
+# Min-MAX normalization, Z-score Standadization (Offense code, reporting area, year and month)
+
 columns_to_apply <- c("OFFENSE_CODE", "REPORTING_AREA", "YEAR", "MONTH")
 
 # Min-Max
@@ -170,23 +176,23 @@ top10_crimes <- data.frame(
 top10_crimes <- top10_crimes[order(-top10_crimes$Count_crimes), ]
 
 # Top 10 Types of Crimes 
-top_10_plot_horizontal <- ggplot(top10_crimes[1:10, ], 
+top_10_plot <- ggplot(top10_crimes[1:10, ], 
                                  aes(x = Count_crimes, y = reorder(OFFENSE_CODE_GROUP, -Count_crimes))) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+  geom_bar(stat = "identity", fill = "red") +
   labs(x = "Number of Reported Crimes", y = "") +
   ggtitle("Top 10 Types of Crimes") +
   theme_minimal() +
   theme(axis.text.y = element_text(angle = 0, vjust = 0.5))  
 
 # Bottom 10 Types of Crimes 
-bottom_10_plot_horizontal <- ggplot(top10_crimes[(nrow(top10_crimes)-9):nrow(top10_crimes), ], 
+bottom_10_plot <- ggplot(top10_crimes[(nrow(top10_crimes)-9):nrow(top10_crimes), ], 
                                     aes(x = Count_crimes, y = reorder(OFFENSE_CODE_GROUP, Count_crimes))) +
-  geom_bar(stat = "identity", fill = "salmon") +
+  geom_bar(stat = "identity", fill = "blue") +
   labs(x = "Number of Reported Crimes", y = "") +
   ggtitle("Bottom 10 Types of Crimes") +
   theme_minimal() +
   theme(axis.text.y = element_text(angle = 0, vjust = 0.5))  
 
 # display the plots 
-grid.arrange(top_10_plot_horizontal, bottom_10_plot_horizontal, ncol = 1)
+grid.arrange(top_10_plot, bottom_10_plot, ncol = 1)
 
