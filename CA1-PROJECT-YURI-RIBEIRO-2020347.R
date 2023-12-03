@@ -21,8 +21,6 @@ head(crimes_complete)
 
 
 # With the library skimr we can have a complete data summary with the mean/median, minimum, maximum and standard deviation
-install.packages("skimr")
-
 numerical_summary_skim <- skim(crimes_complete)
 
 print(numerical_summary_skim)
